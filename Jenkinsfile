@@ -30,7 +30,7 @@ pipeline{
         }
         stage('run dockerfile'){
           steps{
-               sh 'docker build -t sumitsingh231/myproject:2 .'
+               sh 'docker build -t sumitsingh231/myproject:1 .'
            }
         }
         stage('Login the docker hub and push the file'){
@@ -42,7 +42,7 @@ pipeline{
         }
         stage('push to docker hub'){
           steps{
-               sh 'docker push sumitsingh231/myproject:2'
+               sh 'docker push sumitsingh231/myproject:1'
            }
         }
         stage('Diployment stage using ansible'){
