@@ -12,5 +12,11 @@
   - name : Start Docker Service
     command : sudo systemctl start docker
 
+    - name: Stop previous container
+    command: docker stop $(docker ps -a -q)
+
+  - name: delete previous container
+    command: docker rm $(docker ps -a -q)
+    
   - name: Deploy Docker Container
-    command: docker run -itd -p 8088:8064 sumitsingh231/myproject:1
+    command: docker run -itd --rm -p 8088:8064 sumitsingh231/myproject:1
