@@ -1,53 +1,57 @@
 pipeline{
+    
     agent any
+    
+    tools{
+        maven 'mymaven'
+    }
+    
     stages{
-        stage('checkout the code from github'){
+        stage('Clone Repo')
+        {
             steps{
-                 git url: 'https://github.com/sumitsingh231/Banking-java-project/'
-                 echo 'github url checkout'
+                git 'https://github.com/kamraan-eng/Banking-java-project.git'
             }
         }
-        stage('codecompile with sumit'){
-            steps{
-                echo 'starting compiling'
-                sh 'mvn compile'
-            }
-        }
-        stage('codetesting with sumit'){
+        stage('Test Code')
+        {
             steps{
                 sh 'mvn test'
             }
         }
-        stage('qa with sumit'){
-            steps{
-                sh 'mvn checkstyle:checkstyle'
-            }
-        }
-        stage('package with sumit'){
+        
+        stage('Build Code')
+        {
             steps{
                 sh 'mvn package'
             }
         }
-        stage('run dockerfile'){
-          steps{
-               sh 'docker build -t sumitsingh231/myproject:1 .'
-           }
-        }
-        stage('Login the docker hub and push the file'){
+        stage('Build Image')
+        {
             steps{
-                withCredentials([string(credentialsId: 'dockerhubpassword', variable: 'dockerhubpass')]) {
-                    sh 'docker login -u sumitsingh231 -p ${dockerhubpass}'
-                }
+                sh 'docker build -t myproject1:$BUILD_NUMBER .'
             }
         }
-        stage('push to docker hub'){
-          steps{
-               sh 'docker push sumitsingh231/myproject:1'
-           }
+        
+        stage('Deploy the Image')
+        {
+            steps{
+                sh 'docker run -d -P myproject1:$BUILD_NUMBER '
+            }
         }
+         stage('push to dockerhub')
+        {
+            steps{
+                sh 'docker login -u kamraan1 -p '
+                sh 'docker tag myproject1:$BUILD_NUMBER kamraan1/myproject1:$BUILD_NUMBER'
+                sh 'docker push kamraan1/myproject1:$BUILD_NUMBER'
+            }
+            
+        }
+    
         stage('Diployment stage using ansible'){
           steps{
-                      ansiblePlaybook become: true, credentialsId: 'ansible', disableHostKeyChecking: true, installation: 'ansible', inventory: '/etc/ansible/hosts', playbook: 'ansible-playbook.yml', sudoUser: null, vaultTmpPath: ''
+             ansiblePlaybook become: true, credentialsId: 'ansible', disableHostKeyChecking: true, installation: 'ansible', inventory: '/etc/ansible/hosts', playbook: 'ansible-playbook.yml', sudoUser: null, vaultTmpPath: ''
            }
         }
     }
